@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>我们的100天纪念旅程 ❤️</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+    <style>
+        /* --- 全局样式 --- */
+        body, html {
+            margin: 0; padding: 0; overflow: hidden; background-color: #000;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; height: 100%;
+        }
+        #container { width: 100%; height: 100%; position: relative; }
+        .stage {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; /* 初始隐藏 */
+        }
+        /* 开始按钮罩层 */
+        #start-screen {
+            background: #000; z-index: 999; opacity: 1; pointer-events: auto;
+            color: #fff; display: flex; justify-content: center; align-items: center; flex-direction: column;
+        }
+        #start-btn {
+            padding: 15px 30px; border: 2px solid #ff4757; color: #ff4757; font-size: 1.2rem;
+            cursor: pointer; border-radius: 30px; margin-top: 20px; transition: 0.3s;
+        }
+        #start-btn:hover { background: #ff4757; color: white; }
+
+        /* --- Stage 1: 粒子倒计时 --- */
+        #stage-particles { background: #000; }
+        #particles-js { width: 100%; height: 100%; position: absolute; }
+        #countdown-text, #final-100-text {
+            position: absolute; color: #fff; font-size: 5rem; font-weight: bold; z-index: 10; text-shadow: 0 0 20px rgba(255,255,255,0.5);
+        }
+        #final-100-text { color: #ff4757; font-size: 8rem; opacity: 0; }
+
+        /* --- Stage 2: 蜡笔小新 --- */
+        #shinchan-img { width: 60%; max-width: 300px; margin-bottom: 20px; }
+        .dialogue-box {
+            background: #fff; color: #333; padding: 15px 25px; border-radius: 20px;
+            font-size: 1.1rem; position: relative; max-width: 80%;
+        }
+        .dialogue-box::after { /* 对话框小尾巴 */
+            content: ''; position: absolute; top: -10px; left: 50%;
+            border-width: 0 10px 10px; border-style: solid; border-color: #fff transparent; display: block; width: 0;
+        }
+
+        /* --- Stage 3: 胶卷快闪 --- */
+        #film-roll-container { width: 100%; height: 100%; background: #111; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .film-img { width: 90%; height: auto; object-fit: cover; position: absolute; opacity: 0; }
+
+        /* --- Stage 4: 照片画廊 --- */
+        .gallery-slide {
+            position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; opacity: 0;
+        }
+        .photo-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+        .photo-group img { height: 200px; width: auto; object-fit: cover; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .caption { color: #fff; font-size: 1.4rem; margin-top: 20px; min-height: 1.5em; text-align: center; width: 90%; }
+
+        /* --- Stage 5: 视频爱心墙 --- */
+        #video-heart-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr);
+            gap: 5px; width: 90%; max-width: 600px; aspect-ratio: 4/3; position: relative;
+        }
+        .video-item { width: 100%; height: 100%; object-fit: cover; border-radius: 5px; opacity: 0; }
+        /* 爱心形状布局 (4x3网格，空出角落) */
+        .v-pos-1 { grid-area: 1 / 2 / 2 / 3; }
+        .v-pos-2 { grid-area: 1 / 3 / 2 / 4; }
+        .v-pos-3 { grid-area: 2 / 1 / 3 / 2; }
+        .v-pos-4 { grid-area: 2 / 2 / 3 / 3; }
+        .v-pos-5 { grid-area: 2 / 3 / 3 / 4; }
+        .v-pos-6 { grid-area: 2 / 4 / 3 / 5; }
+        .v-pos-7 { grid-area: 3 / 2 / 4 / 4; justify-self: center; width: 50%; } /* 最下面一个居中 */
+
+        .heart-center-text {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: #fff; font-size: 1.2rem; text-align: center; width: 80%; z-index: 10;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8); opacity: 0;
+        }
+
+        /* --- Stage 6: 结尾 --- */
+        #final-message {
+            color: #fff; font-size: 1.5rem; line-height: 1.8; text-align: center; width: 80%; opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <audio id="bgm1" src="assets/music1.mp3" preload="auto"></audio>
+    <audio id="bgm2" src="assets/music2.mp3" preload="auto" loop></audio>
+    <audio id="shinchan-voice" src="assets/shinchan.mp3" preload="auto"></audio>
+
+    <div id="container">
+        <div id="start-screen" class="stage" style="opacity: 1; pointer-events: auto; z-index: 999;">
+            <h1>准备好了吗？</h1>
+            <p>戴上耳机，体验更佳</p>
+            <div id="start-btn">开启我们的100天旅程</div>
+        </div>
+
+        <div id="stage-particles" class="stage">
+            <div id="particles-js"></div>
+            <div id="countdown-text">5</div>
+            <div id="final-100-text">100 DAYS</div>
+        </div>
+
+        <div id="stage-shinchan" class="stage">
+            <img id="shinchan-img" src="assets/shinchan.png" alt="蜡笔小新">
+            <div class="dialogue-box">和我一起体验这次逆转时间的旅程吧！</div>
+        </div>
+
+        <div id="stage-filmroll" class="stage">
+            <div id="film-roll-container">
+                <img class="film-img" src="assets/p1_1.jpg">
+                <img class="film-img" src="assets/p2_1.jpg">
+                <img class="film-img" src="assets/p3_1.jpg">
+                <img class="film-img" src="assets/p4_1.jpg">
+                <img class="film-img" src="assets/p6_1.jpg">
+            </div>
+        </div>
+
+        <div id="stage-gallery" class="stage">
+            <div class="gallery-slide">
+                <div class="photo-group">
+                    <img src="assets/p1_1.jpg"><img src="assets/p1_2.jpg"><img src="assets/p1_3.jpg">
+                </div>
+                <div class="caption">这是谁家的美女啊，原来是我家的啊！</div>
+            </div>
+             <div class="gallery-slide">
+                <div class="photo-group">
+                    <img src="assets/p2_1.jpg"><img src="assets/p2_2.jpg">
+                </div>
+                <div class="caption">有熊陪伴的人就是会很幸福呢</div>
+            </div>
+            <div class="gallery-slide">
+                <div class="photo-group">
+                    <img src="assets/p3_1.jpg">
+                </div>
+                <div class="caption">百吃不厌的巴斯克</div>
+            </div>
+            <div class="gallery-slide">
+                <div class="photo-group">
+                    <img src="assets/p4_1.jpg"><img src="assets/p4_2.jpg"><img src="assets/p4_3.jpg">
+                </div>
+                <div class="caption">出发！首游齐鲁</div>
+            </div>
+            <div class="gallery-slide">
+                <div class="photo-group">
+                    <img src="assets/p5_1.jpg">
+                </div>
+                <div class="caption">哼，三次唉，我就这一张照片，但也珍惜的不得了呢，</div>
+            </div>
+            <div class="gallery-slide">
+                <div class="photo-group">
+                    <img src="assets/p6_1.jpg"><img src="assets/p6_2.jpg">
+                </div>
+                <div class="caption">虽然距离很远，但dimo会代替我一直陪在你的身边</div>
+            </div>
+            <div class="gallery-slide">
+                <div class="photo-group">
+                    <img src="assets/p7_1.jpg">
+                </div>
+                <div class="caption">初代小蛋糕来了</div>
+            </div>
+        </div>
+
+        <div id="stage-videoheart" class="stage">
+            <div id="video-heart-grid">
+                <video class="video-item v-pos-1" src="assets/v1.mp4" muted playsinline></video>
+                <video class="video-item v-pos-2" src="assets/v2.mp4" muted playsinline></video>
+                <video class="video-item v-pos-3" src="assets/v3.mp4" muted playsinline></video>
+                <video class="video-item v-pos-4" src="assets/v4.mp4" muted playsinline></video>
+                <video class="video-item v-pos-5" src="assets/v5.mp4" muted playsinline></video>
+                <video class="video-item v-pos-6" src="assets/v6.mp4" muted playsinline></video>
+                <video class="video-item v-pos-7" src="assets/v7.mp4" muted playsinline></video>
+                <div class="heart-center-text">你的过去我来不及，<br>你的未来我们一言为定❤️</div>
+            </div>
+        </div>
+
+        <div id="stage-finale" class="stage">
+            <div id="final-message">
+                让我们一起相约，<br>在未知的以后，<br>身边，还是彼此。
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // 注册 GSAP 插件
+        gsap.registerPlugin(TextPlugin);
+
+        const bgm1 = document.getElementById('bgm1');
+        const bgm2 = document.getElementById('bgm2');
+        const shinchanVoice = document.getElementById('shinchan-voice');
+
+        // 初始化粒子效果 (多彩流动)
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 100, "density": { "enable": true, "value_area": 800 } },
+                "color": { "value": ["#ff4757", "#2ed573", "#1e90ff", "#ffa502"] }, // 多彩颜色
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.6, "random": true },
+                "size": { "value": 5, "random": true },
+                "line_linked": { "enable": false }, // 不要有连线，更像流动
+                "move": { "enable": true, "speed": 4, "direction": "none", "random": true, "straight": false, "out_mode": "out" }
+            },
+            "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": false }, "onclick": { "enable": false } } },
+            "retina_detect": true
+        });
+
+
+        // === 主流程时间轴 ===
+        let mainTimeline = gsap.timeline({ paused: true });
+
+        // 点击开始按钮触发
+        document.getElementById('start-btn').addEventListener('click', () => {
+            gsap.to('#start-screen', { opacity: 0, duration: 0.5, onComplete: () => {
+                document.getElementById('start-screen').style.display = 'none';
+                bgm1.play(); // 播放第一段音乐
+                mainTimeline.play(); // 开始主流程
+            }});
+        });
+
+
+        // >>>>>>>>> 流程编排开始 <<<<<<<<<
+
+        // 1. 倒计时阶段 (5秒)
+        mainTimeline.to('#stage-particles', { opacity: 1, duration: 0.5 })
+            .to('#countdown-text', { text: "4", duration: 1, ease: "none" }, "+=1")
+            .to('#countdown-text', { text: "3", duration: 1, ease: "none" })
+            .to('#countdown-text', { text: "2", duration: 1, ease: "none" })
+            .to('#countdown-text', { text: "1", duration: 1, ease: "none" });
+
+        // 2. 粒子像烟花散开，重组成 100 DAYS
+        mainTimeline.add("fireworks")
+            .to('#countdown-text', { opacity: 0, duration: 0.3 }, "fireworks")
+            // 这里用一个简化的技巧：让粒子加速散开，然后淡入100 Days文字
+            .to(window.pJSDom[0].pJS.particles.move, { speed: 30, duration: 1 }, "fireworks")
+            .to('#particles-js', { opacity: 0, duration: 1.5 }, "fireworks+=0.5")
+            .to('#final-100-text', { opacity: 1, scale: 1.2, duration: 1.5, ease: "elastic.out(1, 0.3)" }, "fireworks+=0.8")
+            .to('#stage-particles', { opacity: 0, duration: 1 }, "+=2"); // 展示2秒后消失
+
+        // 3. 蜡笔小新登场
+        mainTimeline.add("shinchanShow")
+            .set('#stage-shinchan', { opacity: 1 }, "shinchanShow")
+            .from('#shinchan-img', { y: 100, opacity: 0, duration: 1, ease: "back.out(1.7)" }, "shinchanShow")
+            .from('.dialogue-box', { scale: 0, opacity: 0, duration: 0.5, ease: "back.out(1.7)" }, "+=0.3")
+            .call(() => { shinchanVoice.play(); }) // 播放小新语音
+            .to('#stage-shinchan', { opacity: 0, duration: 0.5 }, "+=3.5"); // 等语音说完(假设3.5秒)消失
+
+        // 4. 胶卷快闪 (快速闪过几张照片)
+        mainTimeline.add("filmFlash")
+            .set('#stage-filmroll', { opacity: 1 }, "filmFlash")
+        // 循环闪现照片
+        document.querySelectorAll('.film-img').forEach((img, index) => {
+            mainTimeline.to(img, { opacity: 1, duration: 0.15, ease: "power1.inOut" })
+                        .to(img, { opacity: 0, duration: 0.15, ease: "power1.inOut" }, "+=0.1");
+        });
+        mainTimeline.set('#stage-filmroll', { opacity: 0 });
+
+
+        // 5. 照片画廊 (缓慢出现字幕)
+        mainTimeline.add("galleryStart")
+            .set('#stage-gallery', { opacity: 1, pointerEvents: 'auto' }, "galleryStart");
+
+        const slides = document.querySelectorAll('.gallery-slide');
+        slides.forEach((slide, index) => {
+            let caption = slide.querySelector('.caption');
+            let captionText = caption.innerText;
+            caption.innerText = ""; // 清空原有文本用于打字机效果
+
+            let slideTL = gsap.timeline();
+            slideTL.to(slide, { opacity: 1, duration: 1 }) // 图片组淡入
+                   .to(caption, { text: captionText, duration: 2, ease: "none" }, "+=0.5") // 字幕打印
+                   .to(slide, { opacity: 0, duration: 1 }, "+=2.5"); // 停留2.5秒后淡出
+
+            mainTimeline.add(slideTL);
+        });
+        mainTimeline.set('#stage-gallery', { opacity: 0, pointerEvents: 'none' });
+
+
+        // 6. 视频爱心墙 & 切换音乐
+        mainTimeline.add("videoHeart")
+            .call(() => {
+                bgm1.pause();
+                bgm2.play(); // 切换到第二段音乐
+                // 播放所有视频
+                document.querySelectorAll('.video-item').forEach(vid => vid.play());
+            }, null, "videoHeart")
+            .set('#stage-videoheart', { opacity: 1 }, "videoHeart")
+            // 视频一个接一个缓慢出现
+            .to('.v-pos-1', { opacity: 1, duration: 1 }, "videoHeart+=0.5")
+            .to('.v-pos-2', { opacity: 1, duration: 1 }, "-=0.5")
+            .to('.v-pos-3', { opacity: 1, duration: 1 }, "-=0.5")
+            .to('.v-pos-4', { opacity: 1, duration: 1 }, "-=0.5")
+            .to('.v-pos-5', { opacity: 1, duration: 1 }, "-=0.5")
+            .to('.v-pos-6', { opacity: 1, duration: 1 }, "-=0.5")
+            .to('.v-pos-7', { opacity: 1, duration: 1 }, "-=0.5")
+            // 中间文字浮现
+            .to('.heart-center-text', { opacity: 1, y: "-50%", duration: 2, ease: "power2.out" }, "+=1")
+            .to('#stage-videoheart', { opacity: 0, duration: 2 }, "+=5"); // 展示5秒后消失
+
+
+        // 7. 结尾文字浮现
+        mainTimeline.add("finale")
+            .set('#stage-finale', { opacity: 1 }, "finale")
+            .from('#final-message', { y: 50, opacity: 0, duration: 3, ease: "power2.out" }, "finale+=0.5");
+
+        // >>>>>>>>> 流程结束 <<<<<<<<<
+
+    </script>
+</body>
+</html>
