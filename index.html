@@ -3,55 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>我们的100天纪念旅程 (移动端优化版 V4) 🛠️</title>
+    <title>我们的100天纪念旅程 (V5 微调版) ❤️</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 
     <style>
-        /* --- 全局样式 (移动端核心) --- */
+        /* --- 全局样式 --- */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html {
             margin: 0; padding: 0; overflow: hidden; 
             background-color: #ffffff; 
-            font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, sans-serif;
-            height: 100%; width: 100%;
-            position: fixed; /* 锁定屏幕 */
+            font-family: 'PingFang SC', -apple-system, sans-serif;
+            height: 100%; width: 100%; position: fixed;
         }
         #container { width: 100%; height: 100%; position: relative; }
         .stage {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; 
-            justify-content: center; /* 垂直居中 */
-            align-items: center; /* 水平居中 */
-            opacity: 0; pointer-events: none;
-            padding: 20px; /* 防止内容贴边 */
+            justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; padding: 10px;
         }
 
         /* --- 启动页 --- */
         #start-screen { background: #ffffff; z-index: 999; opacity: 1; pointer-events: auto; }
         #start-btn {
-            padding: 15px 40px; border: 2px solid #ff4757; color: #ff4757; font-size: 1.1rem;
+            padding: 12px 35px; border: 2px solid #ff4757; color: #ff4757; font-size: 1.1rem;
             cursor: pointer; border-radius: 50px; margin-top: 30px; letter-spacing: 1px;
             background: transparent; font-weight: bold;
         }
 
-        /* --- Stage 1: 倒计时/100天 --- */
+        /* --- Stage 1: 倒计时 --- */
         #stage-particles { background: #ffffff; }
-        #countdown-timer {
-            position: absolute; color: #333; font-size: 12vw; /* 使用视窗单位适配 */
-            font-weight: 300; font-family: 'Courier New', monospace;
-        }
+        #countdown-timer { position: absolute; color: #333; font-size: 12vw; font-weight: 300; font-family: monospace; }
         .time-label { font-size: 1rem; color: #999; letter-spacing: 2px; margin-top: 10px; display: block; text-align: center;}
-        #final-100-text { 
-            position: absolute; color: #ff4757; font-size: 15vw; opacity: 0; font-weight: bold;
-        }
+        #final-100-text { position: absolute; color: #ff4757; font-size: 15vw; opacity: 0; font-weight: bold; }
 
         /* --- Stage 2: 蜡笔小新 --- */
-        #shinchan-img { width: 70%; max-width: 300px; margin-bottom: 3vh; }
+        #shinchan-img { width: 65%; max-width: 280px; margin-bottom: 3vh; }
         .dialogue-box {
-            background: #fff; color: #333; padding: 15px 20px; border-radius: 15px;
-            font-size: 1rem; position: relative; max-width: 90%; opacity: 0;
+            background: #fff; color: #333; padding: 12px 18px; border-radius: 15px;
+            font-size: 1rem; position: relative; max-width: 85%; opacity: 0;
             border: 1px solid #eee; box-shadow: 0 5px 20px rgba(0,0,0,0.08);
         }
         .dialogue-box::after {
@@ -61,77 +53,70 @@
 
         /* --- Stage 3: 胶卷快闪 --- */
         #film-roll-container { width: 100%; height: 100%; background: #fff; display: flex; align-items: center; justify-content: center; }
-        /* 确保图片按比例显示完整 */
-        .film-img { width: auto; height: auto; max-width: 95%; max-height: 95%; object-fit: contain; position: absolute; opacity: 0; }
+        .film-img { width: auto; height: auto; max-width: 95%; max-height: 80%; object-fit: contain; position: absolute; opacity: 0; }
 
-        /* --- Stage 4: 照片画廊 (移动端重构) --- */
+        /* --- Stage 4: 照片画廊 --- */
         .gallery-slide {
             position: absolute; width: 100%; height: 100%; 
             display: flex; flex-direction: column;
-            /* 上下分布：上面放图，下面放字 */
-            justify-content: space-between; 
-            align-items: center; opacity: 0;
-            padding: 20px 0 40px 0; /* 上下留白 */
+            justify-content: space-between; align-items: center; opacity: 0;
+            padding: 30px 0 50px 0;
         }
-        /* 照片容器：占据上方大部分空间 */
         .photo-group-container {
-            flex: 1; /* 占满剩余空间 */
-            width: 100%;
-            display: flex; justify-content: center; align-items: center;
-            overflow: hidden;
-            margin-bottom: 20px;
+            flex: 1; width: 100%; display: flex; justify-content: center; align-items: center;
+            overflow: hidden; margin-bottom: 20px;
         }
-        .photo-group { 
-            display: flex; flex-wrap: wrap; justify-content: center; align-items: center; 
-            gap: 10px; width: 100%; height: 100%;
-        }
-        /* 照片样式：核心修改 */
+        .photo-group { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; width: 100%; }
         .photo-group img { 
-            /* 让图片尽可能大，但不超过屏幕，且显示完整 */
-            width: auto; height: auto;
-            max-width: 90%; max-height: 60vh; /* 最大高度不超过屏幕的60% */
-            object-fit: contain; /* 保证照片显示完整，不裁切 */
-            border-radius: 8px; 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            width: auto; height: auto; max-width: 90%; max-height: 55vh; 
+            object-fit: contain; border-radius: 8px; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
-        /* 如果一组有多张图，让它们稍微小一点以便排布 */
-        .photo-group.multi-photos img { max-height: 40vh; max-width: 45%; }
+        .photo-group.multi-photos img { max-height: 35vh; max-width: 46%; }
 
-        /* 字幕样式 */
         .caption { 
-            font-size: 1.2rem; text-align: center; width: 90%; 
-            font-weight: bold; letter-spacing: 1px; line-height: 1.5; 
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            /* 颜色会由JS随机生成 */
+            font-size: 1.1rem; text-align: center; width: 92%; 
+            font-weight: bold; letter-spacing: 1px; line-height: 1.4; 
             transition: color 0.5s;
-            padding: 10px; background: rgba(255,255,255,0.9); border-radius: 10px; /* 加个背景防止看不清 */
+            padding: 10px; background: rgba(255,255,255,0.95); border-radius: 10px;
         }
 
-        /* --- Stage 5: 视频爱心墙 --- */
+        /* --- Stage 5: 视频爱心墙 (核心修改) --- */
         #video-heart-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr);
-            gap: 3px; width: 98%; aspect-ratio: 4/3; position: relative;
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            grid-template-rows: repeat(3, 1fr);
+            gap: 4px; 
+            /* 修改点：缩小宽度，确保不贴边 */
+            width: 85vw; 
+            max-width: 340px; /* 限制最大宽度 */
+            aspect-ratio: 4/3; 
+            position: relative;
         }
-        /* 确保视频填满格子 */
-        .video-item { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; opacity: 0; display: block; background: #000;}
+        .video-item { 
+            width: 100%; height: 100%; 
+            object-fit: cover; /* 填满格子 */
+            border-radius: 4px; opacity: 0; display: block; background: #000;
+        }
         .v-pos-1 { grid-area: 1 / 2 / 2 / 3; }
         .v-pos-2 { grid-area: 1 / 3 / 2 / 4; }
         .v-pos-3 { grid-area: 2 / 1 / 3 / 2; }
         .v-pos-4 { grid-area: 2 / 2 / 3 / 3; }
         .v-pos-5 { grid-area: 2 / 3 / 3 / 4; }
         .v-pos-6 { grid-area: 2 / 4 / 3 / 5; }
-        .v-pos-7 { grid-area: 3 / 2 / 4 / 4; justify-self: center; width: 100%; } /* 修正最下面视频宽度 */
+        .v-pos-7 { grid-area: 3 / 2 / 4 / 4; justify-self: center; width: 100%; }
 
         .heart-center-text {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: #ff4757; background: rgba(255,255,255,0.9);
-            padding: 15px 10px; border-radius: 10px; font-size: 1rem; text-align: center; width: 80%; z-index: 10;
-            opacity: 0; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            color: #ff4757; background: rgba(255,255,255,0.95);
+            padding: 12px 10px; border-radius: 8px; font-size: 0.9rem; text-align: center; width: 90%; z-index: 10;
+            opacity: 0; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            pointer-events: none; /* 防止遮挡点击 */
         }
 
         /* --- Stage 6: 结尾 --- */
         #final-message {
-            color: #333; font-size: 1.4rem; line-height: 2; text-align: center; width: 85%; opacity: 0; letter-spacing: 2px; font-weight: 300;
+            color: #333; font-size: 1.3rem; line-height: 2; text-align: center; width: 85%; opacity: 0; letter-spacing: 2px; font-weight: 300;
         }
     </style>
 </head>
@@ -143,8 +128,7 @@
     <div id="container">
         <div id="start-screen" class="stage" style="opacity: 1; pointer-events: auto;">
             <div style="font-size: 3rem; margin-bottom: 20px;">🎬</div>
-            <h1>排练模式 V4</h1>
-            <p style="color:#999; font-size: 0.9rem;">优化移动端布局与视频播放</p>
+            <h1>调试模式 V5</h1>
             <div id="start-btn">开始调试</div>
         </div>
 
@@ -161,11 +145,11 @@
 
         <div id="stage-filmroll" class="stage">
             <div id="film-roll-container">
-                <img class="film-img" src="p1_1.jpg" alt="快闪图p1_1挂了">
-                <img class="film-img" src="p2_1.jpg" alt="快闪图p2_1挂了">
-                <img class="film-img" src="p4_1.jpg" alt="快闪图p4_1挂了">
-                <img class="film-img" src="p6_1.jpg" alt="快闪图p6_1挂了">
-                <img class="film-img" src="p7_1.jpg" alt="快闪图p7_1挂了">
+                <img class="film-img" src="p1_1.jpg">
+                <img class="film-img" src="p2_1.jpg">
+                <img class="film-img" src="p4_1.jpg">
+                <img class="film-img" src="p6_1.jpg">
+                <img class="film-img" src="p7_1.jpg">
             </div>
         </div>
 
@@ -173,7 +157,7 @@
             <div class="gallery-slide">
                 <div class="photo-group-container">
                     <div class="photo-group multi-photos">
-                        <img src="p1_1.jpg" alt="p1_1挂了"><img src="p1_2.jpg" alt="p1_2挂了"><img src="p1_3.jpg" alt="p1_3挂了">
+                        <img src="p1_1.jpg"><img src="p1_2.jpg"><img src="p1_3.jpg">
                     </div>
                 </div>
                 <div class="caption">这是谁家的美女啊，原来是我家的啊！</div>
@@ -181,7 +165,7 @@
              <div class="gallery-slide">
                 <div class="photo-group-container">
                     <div class="photo-group multi-photos">
-                        <img src="p2_1.jpg" alt="p2_1挂了"><img src="p2_2.jpg" alt="p2_2挂了">
+                        <img src="p2_1.jpg"><img src="p2_2.jpg">
                     </div>
                 </div>
                 <div class="caption">有熊陪伴的人就是会很幸福呢</div>
@@ -189,7 +173,7 @@
             <div class="gallery-slide">
                 <div class="photo-group-container">
                     <div class="photo-group">
-                        <img src="p3_1.jpg" alt="p3_1挂了">
+                        <img src="p3_1.jpg">
                     </div>
                 </div>
                 <div class="caption">百吃不厌的巴斯克</div>
@@ -197,7 +181,7 @@
             <div class="gallery-slide">
                 <div class="photo-group-container">
                     <div class="photo-group multi-photos">
-                        <img src="p4_1.jpg" alt="p4_1挂了"><img src="p4_2.jpg" alt="p4_2挂了"><img src="p4_3.jpg" alt="p4_3挂了">
+                        <img src="p4_1.jpg"><img src="p4_2.jpg"><img src="p4_3.jpg">
                     </div>
                 </div>
                 <div class="caption">出发！首游齐鲁</div>
@@ -205,15 +189,15 @@
             <div class="gallery-slide">
                 <div class="photo-group-container">
                     <div class="photo-group">
-                        <img src="p5_1.jpg" alt="p5_1挂了">
+                        <img src="p5_1.jpg">
                     </div>
                 </div>
-                <div class="caption">哼，三次唉，我就这一张照片，但也珍惜的不得了呢</div>
+                <div class="caption">哼，很多次唉，我就这一张照片，但也珍惜的不得了呢</div>
             </div>
             <div class="gallery-slide">
                 <div class="photo-group-container">
                     <div class="photo-group multi-photos">
-                        <img src="p6_1.jpg" alt="p6_1挂了"><img src="p6_2.jpg" alt="p6_2挂了">
+                        <img src="p6_1.jpg"><img src="p6_2.jpg">
                     </div>
                 </div>
                 <div class="caption">虽然距离很远，但dimo会代替我一直陪在你的身边</div>
@@ -221,7 +205,7 @@
             <div class="gallery-slide">
                 <div class="photo-group-container">
                     <div class="photo-group">
-                        <img src="p7_1.jpg" alt="p7_1挂了">
+                        <img src="p7_1.jpg">
                     </div>
                 </div>
                 <div class="caption">初代小蛋糕来了</div>
@@ -246,7 +230,6 @@
         </div>
     </div>
 
-
     <script>
         gsap.registerPlugin(TextPlugin);
         const bgm1 = document.getElementById('bgm1');
@@ -254,74 +237,60 @@
         const shinchanVoice = document.getElementById('shinchan-voice');
         const videos = document.querySelectorAll('.video-item');
 
-        // --- 随机颜色辅助函数 ---
         function getRandomColor() {
             const colors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#8e44ad', '#e84393', '#00b894'];
             return colors[Math.floor(Math.random() * colors.length)];
         }
 
-        // --- 配置区域 (调试版：立即结束) ---
+        // --- 调试模式：时间设为过去 ---
         const TARGET_DATE = new Date().getTime() - 1000;
 
-        // 粒子配置
         particlesJS("particles-js", {
             "particles": {
-                "number": { "value": 60 }, /* 手机上粒子少一点，性能好 */
+                "number": { "value": 50 },
                 "color": { "value": ["#ff6b81", "#70a1ff", "#2ed573"] },
                 "shape": { "type": "circle" },
                 "opacity": { "value": 0.7, "random": true },
-                "size": { "value": 4, "random": true },
+                "size": { "value": 3, "random": true },
                 "move": { "enable": true, "speed": 3, "direction": "none", "random": true, "out_mode": "out" },
                 "line_linked": { "enable": false }
             },
-            "interactivity": { "events": { "onclick": { "enable": false }, "onhover": { "enable": false } } }
+            "interactivity": { "events": { "onclick": { "enable": false } } }
         });
 
         let timerInterval;
         const mainTimeline = gsap.timeline({ paused: true });
 
-        // 倒计时逻辑
         function updateTimer() {
             const now = new Date().getTime();
             const distance = TARGET_DATE - now;
             if (distance < 0) {
                 clearInterval(timerInterval);
-                document.getElementById("countdown-timer").innerHTML = ""; // 清空倒计时
+                document.getElementById("countdown-timer").innerHTML = "";
                 startMainShow();
                 return;
             }
-            // (调试模式下不显示具体时间，直接跳过)
         }
 
-        // --- 核心修改：点击开始时的处理 ---
         document.getElementById('start-btn').addEventListener('click', () => {
-            // 1. 尝试激活所有音频和视频 (解决手机不自动播放的问题)
             bgm1.play().catch(()=>{}); bgm1.pause();
             bgm2.play().catch(()=>{}); bgm2.pause();
             shinchanVoice.play().catch(()=>{}); shinchanVoice.pause();
-            videos.forEach(v => { 
-                v.play().catch((e)=>{console.log("视频播放失败，可能路径不对或格式不支持", e)}); 
-                v.pause(); 
-            });
+            videos.forEach(v => { v.play().catch(()=>{}); v.pause(); });
 
-            // 2. 开始界面动画
             gsap.to('#start-screen', { opacity: 0, duration: 0.8, onComplete: () => {
                 document.getElementById('start-screen').style.display = 'none';
                 gsap.to('#stage-particles', { opacity: 1, duration: 1 });
-                bgm1.play(); // 播放背景乐1
-                updateTimer(); // 触发倒计时结束逻辑
+                bgm1.play();
+                updateTimer();
             }});
         });
 
         function startMainShow() {
             const tl = gsap.timeline();
-            // 倒计时文字淡出
             tl.to('#countdown-timer', { opacity: 0, duration: 0.5 })
-              .call(() => {
-                  if(window.pJSDom && window.pJSDom[0]) window.pJSDom[0].pJS.particles.move.speed = 40;
-              })
+              .call(() => { if(window.pJSDom && window.pJSDom[0]) window.pJSDom[0].pJS.particles.move.speed = 40; })
               .to('#final-100-text', { opacity: 1, scale: 1.1, duration: 1.5, ease: "elastic.out(1, 0.3)" }, "+=0.1")
-              // --- 修改：缩短了这里的等待时间到 1 秒 ---
               .to('#stage-particles', { opacity: 0, duration: 1 }, "+=1") 
               .add(playShinchanSequence());
         }
@@ -329,21 +298,21 @@
         function playShinchanSequence() {
             const tl = gsap.timeline();
             
-            // 蜡笔小新
+            // 小新
             tl.set('#stage-shinchan', { opacity: 1 })
               .from('#shinchan-img', { y: 200, opacity: 0, duration: 1, ease: "back.out(1.7)" })
               .to('.dialogue-box', { opacity: 1, scale: 1, duration: 0.5 }, "+=0.2")
               .call(() => shinchanVoice.play())
               .to('#stage-shinchan', { opacity: 0, duration: 0.8 }, "+=3.5");
 
-            // 胶卷快闪
+            // 快闪
             tl.set('#stage-filmroll', { opacity: 1 })
             document.querySelectorAll('.film-img').forEach(img => {
                 tl.to(img, { opacity: 1, duration: 0.1 }).to(img, { opacity: 0, duration: 0.1 }, "+=0.1");
             });
             tl.set('#stage-filmroll', { opacity: 0 });
 
-            // 照片画廊 (带随机颜色字幕)
+            // 画廊
             tl.set('#stage-gallery', { opacity: 1, pointerEvents: 'auto' });
             
             const slides = document.querySelectorAll('.gallery-slide');
@@ -351,7 +320,6 @@
                 let caption = slide.querySelector('.caption');
                 let text = caption.innerText;
                 caption.innerText = "";
-                // 设置一个随机颜色
                 caption.style.color = getRandomColor();
 
                 let slideTL = gsap.timeline();
@@ -362,11 +330,9 @@
                 tl.add(slideTL);
             });
 
-            // 视频爱心墙
+            // 视频墙 (缩小版)
             tl.call(() => {
-                bgm1.pause();
-                bgm2.play(); // 切换BGM
-                // 再次尝试播放视频
+                bgm1.pause(); bgm2.play();
                 videos.forEach(v => { v.currentTime = 0; v.play(); });
             })
             .set('#stage-gallery', { opacity: 0 })
