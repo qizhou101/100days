@@ -3,119 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>我们的100天纪念旅程 (调试版) 🛠️</title>
+    <title>我们的100天纪念旅程 (移动端优化版 V4) 🛠️</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 
     <style>
-        /* --- 全局样式 (白色主题) --- */
+        /* --- 全局样式 (移动端核心) --- */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html {
             margin: 0; padding: 0; overflow: hidden; 
             background-color: #ffffff; 
-            color: #333333;
-            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; height: 100%;
+            font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, sans-serif;
+            height: 100%; width: 100%;
+            position: fixed; /* 锁定屏幕 */
         }
         #container { width: 100%; height: 100%; position: relative; }
         .stage {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            display: flex; flex-direction: column; 
+            justify-content: center; /* 垂直居中 */
+            align-items: center; /* 水平居中 */
             opacity: 0; pointer-events: none;
+            padding: 20px; /* 防止内容贴边 */
         }
 
         /* --- 启动页 --- */
-        #start-screen {
-            background: #ffffff; z-index: 999; opacity: 1; pointer-events: auto;
-            color: #333;
-        }
+        #start-screen { background: #ffffff; z-index: 999; opacity: 1; pointer-events: auto; }
         #start-btn {
-            padding: 15px 40px; border: 2px solid #ff4757; color: #ff4757; font-size: 1.2rem;
-            cursor: pointer; border-radius: 50px; margin-top: 30px; letter-spacing: 2px;
-            transition: 0.5s; text-transform: uppercase; background: transparent;
-            font-weight: bold;
+            padding: 15px 40px; border: 2px solid #ff4757; color: #ff4757; font-size: 1.1rem;
+            cursor: pointer; border-radius: 50px; margin-top: 30px; letter-spacing: 1px;
+            background: transparent; font-weight: bold;
         }
-        #start-btn:hover { background: #ff4757; color: white; box-shadow: 0 5px 20px rgba(255, 71, 87, 0.4); }
 
-        /* --- Stage 1: 实时倒计时 --- */
+        /* --- Stage 1: 倒计时/100天 --- */
         #stage-particles { background: #ffffff; }
-        #particles-js { width: 100%; height: 100%; position: absolute; }
-        
         #countdown-timer {
-            position: absolute; color: #333;
-            font-size: 4rem; font-weight: 300; z-index: 10;
-            font-family: 'Courier New', Courier, monospace;
-            text-shadow: none;
-            letter-spacing: 5px;
+            position: absolute; color: #333; font-size: 12vw; /* 使用视窗单位适配 */
+            font-weight: 300; font-family: 'Courier New', monospace;
         }
         .time-label { font-size: 1rem; color: #999; letter-spacing: 2px; margin-top: 10px; display: block; text-align: center;}
-        
         #final-100-text { 
-            position: absolute; color: #ff4757; font-size: 6rem; opacity: 0; z-index: 20;
-            font-weight: bold;
+            position: absolute; color: #ff4757; font-size: 15vw; opacity: 0; font-weight: bold;
         }
 
         /* --- Stage 2: 蜡笔小新 --- */
-        #shinchan-img { width: 60%; max-width: 300px; margin-bottom: 20px; }
+        #shinchan-img { width: 70%; max-width: 300px; margin-bottom: 3vh; }
         .dialogue-box {
-            background: #fff; color: #333; padding: 15px 25px; border-radius: 20px;
-            font-size: 1.1rem; position: relative; max-width: 80%; opacity: 0;
-            border: 1px solid #eee;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            background: #fff; color: #333; padding: 15px 20px; border-radius: 15px;
+            font-size: 1rem; position: relative; max-width: 90%; opacity: 0;
+            border: 1px solid #eee; box-shadow: 0 5px 20px rgba(0,0,0,0.08);
         }
         .dialogue-box::after {
-            content: ''; position: absolute; top: -10px; left: 50%;
-            border-width: 0 10px 10px; border-style: solid; 
-            border-color: #fff transparent; 
-            display: block; width: 0;
-            filter: drop-shadow(0 -2px 2px rgba(0,0,0,0.05));
+            content: ''; position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+            border-width: 0 10px 10px; border-style: solid; border-color: #fff transparent; display: block;
         }
 
         /* --- Stage 3: 胶卷快闪 --- */
         #film-roll-container { width: 100%; height: 100%; background: #fff; display: flex; align-items: center; justify-content: center; }
-        .film-img { width: 100%; height: 100%; object-fit: contain; position: absolute; opacity: 0; }
+        /* 确保图片按比例显示完整 */
+        .film-img { width: auto; height: auto; max-width: 95%; max-height: 95%; object-fit: contain; position: absolute; opacity: 0; }
 
-        /* --- Stage 4: 照片画廊 --- */
+        /* --- Stage 4: 照片画廊 (移动端重构) --- */
         .gallery-slide {
-            position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; opacity: 0;
+            position: absolute; width: 100%; height: 100%; 
+            display: flex; flex-direction: column;
+            /* 上下分布：上面放图，下面放字 */
+            justify-content: space-between; 
+            align-items: center; opacity: 0;
+            padding: 20px 0 40px 0; /* 上下留白 */
         }
-        .photo-group { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; }
+        /* 照片容器：占据上方大部分空间 */
+        .photo-group-container {
+            flex: 1; /* 占满剩余空间 */
+            width: 100%;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .photo-group { 
+            display: flex; flex-wrap: wrap; justify-content: center; align-items: center; 
+            gap: 10px; width: 100%; height: 100%;
+        }
+        /* 照片样式：核心修改 */
         .photo-group img { 
-            height: 220px; width: auto; object-fit: cover; border-radius: 8px; 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            /* 让图片尽可能大，但不超过屏幕，且显示完整 */
+            width: auto; height: auto;
+            max-width: 90%; max-height: 60vh; /* 最大高度不超过屏幕的60% */
+            object-fit: contain; /* 保证照片显示完整，不裁切 */
+            border-radius: 8px; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
+        /* 如果一组有多张图，让它们稍微小一点以便排布 */
+        .photo-group.multi-photos img { max-height: 40vh; max-width: 45%; }
+
+        /* 字幕样式 */
         .caption { 
-            color: #444; font-size: 1.3rem; text-align: center; width: 85%; 
-            font-weight: 400; letter-spacing: 1px; line-height: 1.6; text-shadow: none;
+            font-size: 1.2rem; text-align: center; width: 90%; 
+            font-weight: bold; letter-spacing: 1px; line-height: 1.5; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            /* 颜色会由JS随机生成 */
+            transition: color 0.5s;
+            padding: 10px; background: rgba(255,255,255,0.9); border-radius: 10px; /* 加个背景防止看不清 */
         }
 
         /* --- Stage 5: 视频爱心墙 --- */
         #video-heart-grid {
             display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr);
-            gap: 5px; width: 95%; max-width: 600px; aspect-ratio: 4/3; position: relative;
+            gap: 3px; width: 98%; aspect-ratio: 4/3; position: relative;
         }
-        .video-item { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; opacity: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        /* 确保视频填满格子 */
+        .video-item { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; opacity: 0; display: block; background: #000;}
         .v-pos-1 { grid-area: 1 / 2 / 2 / 3; }
         .v-pos-2 { grid-area: 1 / 3 / 2 / 4; }
         .v-pos-3 { grid-area: 2 / 1 / 3 / 2; }
         .v-pos-4 { grid-area: 2 / 2 / 3 / 3; }
         .v-pos-5 { grid-area: 2 / 3 / 3 / 4; }
         .v-pos-6 { grid-area: 2 / 4 / 3 / 5; }
-        .v-pos-7 { grid-area: 3 / 2 / 4 / 4; justify-self: center; width: 50%; }
+        .v-pos-7 { grid-area: 3 / 2 / 4 / 4; justify-self: center; width: 100%; } /* 修正最下面视频宽度 */
 
         .heart-center-text {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: #ff4757;
-            background: rgba(255,255,255,0.8);
-            padding: 10px 20px; border-radius: 10px;
-            font-size: 1.2rem; text-align: center; width: auto; min-width: 60%; z-index: 10;
-            opacity: 0; font-weight: bold;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            color: #ff4757; background: rgba(255,255,255,0.9);
+            padding: 15px 10px; border-radius: 10px; font-size: 1rem; text-align: center; width: 80%; z-index: 10;
+            opacity: 0; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
         /* --- Stage 6: 结尾 --- */
         #final-message {
-            color: #333; font-size: 1.6rem; line-height: 2; text-align: center; width: 80%; opacity: 0; letter-spacing: 2px; font-weight: 300;
+            color: #333; font-size: 1.4rem; line-height: 2; text-align: center; width: 85%; opacity: 0; letter-spacing: 2px; font-weight: 300;
         }
     </style>
 </head>
@@ -127,74 +143,100 @@
     <div id="container">
         <div id="start-screen" class="stage" style="opacity: 1; pointer-events: auto;">
             <div style="font-size: 3rem; margin-bottom: 20px;">🎬</div>
-            <h1>排练模式：立即开始</h1>
+            <h1>排练模式 V4</h1>
+            <p style="color:#999; font-size: 0.9rem;">优化移动端布局与视频播放</p>
             <div id="start-btn">开始调试</div>
         </div>
 
         <div id="stage-particles" class="stage">
             <div id="particles-js"></div>
-            <div id="countdown-timer">
-                00:00:00
-                <span class="time-label">UNTIL THE MOMENT</span>
-            </div>
+            <div id="countdown-timer">00:00:00</div>
             <div id="final-100-text">100 DAYS</div>
         </div>
 
         <div id="stage-shinchan" class="stage">
-            <img id="shinchan-img" src="shinchan.png" alt="蜡笔小新">
+            <img id="shinchan-img" src="shinchan.png" alt="小新图片挂了">
             <div class="dialogue-box">和我一起体验这次逆转时间的旅程吧！</div>
         </div>
 
         <div id="stage-filmroll" class="stage">
             <div id="film-roll-container">
-                <img class="film-img" src="p1_1.jpg">
-                <img class="film-img" src="p2_1.jpg">
-                <img class="film-img" src="p4_1.jpg">
-                <img class="film-img" src="p6_1.jpg">
-                <img class="film-img" src="p7_1.jpg">
+                <img class="film-img" src="p1_1.jpg" alt="快闪图p1_1挂了">
+                <img class="film-img" src="p2_1.jpg" alt="快闪图p2_1挂了">
+                <img class="film-img" src="p4_1.jpg" alt="快闪图p4_1挂了">
+                <img class="film-img" src="p6_1.jpg" alt="快闪图p6_1挂了">
+                <img class="film-img" src="p7_1.jpg" alt="快闪图p7_1挂了">
             </div>
         </div>
 
         <div id="stage-gallery" class="stage">
             <div class="gallery-slide">
-                <div class="photo-group"><img src="p1_1.jpg"><img src="p1_2.jpg"><img src="p1_3.jpg"></div>
+                <div class="photo-group-container">
+                    <div class="photo-group multi-photos">
+                        <img src="p1_1.jpg" alt="p1_1挂了"><img src="p1_2.jpg" alt="p1_2挂了"><img src="p1_3.jpg" alt="p1_3挂了">
+                    </div>
+                </div>
                 <div class="caption">这是谁家的美女啊，原来是我家的啊！</div>
             </div>
              <div class="gallery-slide">
-                <div class="photo-group"><img src="p2_1.jpg"><img src="p2_2.jpg"></div>
+                <div class="photo-group-container">
+                    <div class="photo-group multi-photos">
+                        <img src="p2_1.jpg" alt="p2_1挂了"><img src="p2_2.jpg" alt="p2_2挂了">
+                    </div>
+                </div>
                 <div class="caption">有熊陪伴的人就是会很幸福呢</div>
             </div>
             <div class="gallery-slide">
-                <div class="photo-group"><img src="p3_1.jpg"></div>
+                <div class="photo-group-container">
+                    <div class="photo-group">
+                        <img src="p3_1.jpg" alt="p3_1挂了">
+                    </div>
+                </div>
                 <div class="caption">百吃不厌的巴斯克</div>
             </div>
             <div class="gallery-slide">
-                <div class="photo-group"><img src="p4_1.jpg"><img src="p4_2.jpg"><img src="p4_3.jpg"></div>
+                <div class="photo-group-container">
+                    <div class="photo-group multi-photos">
+                        <img src="p4_1.jpg" alt="p4_1挂了"><img src="p4_2.jpg" alt="p4_2挂了"><img src="p4_3.jpg" alt="p4_3挂了">
+                    </div>
+                </div>
                 <div class="caption">出发！首游齐鲁</div>
             </div>
             <div class="gallery-slide">
-                <div class="photo-group"><img src="p5_1.jpg"></div>
+                <div class="photo-group-container">
+                    <div class="photo-group">
+                        <img src="p5_1.jpg" alt="p5_1挂了">
+                    </div>
+                </div>
                 <div class="caption">哼，三次唉，我就这一张照片，但也珍惜的不得了呢</div>
             </div>
             <div class="gallery-slide">
-                <div class="photo-group"><img src="p6_1.jpg"><img src="p6_2.jpg"></div>
+                <div class="photo-group-container">
+                    <div class="photo-group multi-photos">
+                        <img src="p6_1.jpg" alt="p6_1挂了"><img src="p6_2.jpg" alt="p6_2挂了">
+                    </div>
+                </div>
                 <div class="caption">虽然距离很远，但dimo会代替我一直陪在你的身边</div>
             </div>
             <div class="gallery-slide">
-                <div class="photo-group"><img src="p7_1.jpg"></div>
+                <div class="photo-group-container">
+                    <div class="photo-group">
+                        <img src="p7_1.jpg" alt="p7_1挂了">
+                    </div>
+                </div>
                 <div class="caption">初代小蛋糕来了</div>
             </div>
         </div>
 
         <div id="stage-videoheart" class="stage">
             <div id="video-heart-grid">
-                <video class="video-item v-pos-1" src="v1.mp4" muted playsinline></video>
-                <video class="video-item v-pos-2" src="v2.mp4" muted playsinline></video>
-                <video class="video-item v-pos-3" src="v3.mp4" muted playsinline></video>
-                <video class="video-item v-pos-4" src="v4.mp4" muted playsinline></video>
-                <video class="video-item v-pos-5" src="v5.mp4" muted playsinline></video>
-                <video class="video-item v-pos-6" src="v6.mp4" muted playsinline></video>
-                <video class="video-item v-pos-7" src="v7.mp4" muted playsinline></video>
+                <video class="video-item v-pos-1" src="v1.mp4" muted playsinline webkit-playsinline loop></video>
+                <video class="video-item v-pos-2" src="v2.mp4" muted playsinline webkit-playsinline loop></video>
+                <video class="video-item v-pos-3" src="v3.mp4" muted playsinline webkit-playsinline loop></video>
+                <video class="video-item v-pos-4" src="v4.mp4" muted playsinline webkit-playsinline loop></video>
+                <video class="video-item v-pos-5" src="v5.mp4" muted playsinline webkit-playsinline loop></video>
+                <video class="video-item v-pos-6" src="v6.mp4" muted playsinline webkit-playsinline loop></video>
+                <video class="video-item v-pos-7" src="v7.mp4" muted playsinline webkit-playsinline loop></video>
                 <div class="heart-center-text">你的过去我来不及，<br>你的未来我们一言为定❤️</div>
             </div>
         </div>
@@ -210,72 +252,77 @@
         const bgm1 = document.getElementById('bgm1');
         const bgm2 = document.getElementById('bgm2');
         const shinchanVoice = document.getElementById('shinchan-voice');
+        const videos = document.querySelectorAll('.video-item');
 
-        // ================= 配置区域 =================
-        // 【重要：正式发给她前改回这个】 const TARGET_DATE = new Date("2025-12-25T17:21:00").getTime();
-        
-        // 【调试用】 设置目标时间为当前时间的 1 秒前，这样倒计时会立即结束
+        // --- 随机颜色辅助函数 ---
+        function getRandomColor() {
+            const colors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#8e44ad', '#e84393', '#00b894'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // --- 配置区域 (调试版：立即结束) ---
         const TARGET_DATE = new Date().getTime() - 1000;
-        // ===========================================
 
+        // 粒子配置
         particlesJS("particles-js", {
             "particles": {
-                "number": { "value": 80 },
-                "color": { "value": ["#ff6b81", "#70a1ff", "#2ed573", "#a29bfe"] },
+                "number": { "value": 60 }, /* 手机上粒子少一点，性能好 */
+                "color": { "value": ["#ff6b81", "#70a1ff", "#2ed573"] },
                 "shape": { "type": "circle" },
                 "opacity": { "value": 0.7, "random": true },
-                "size": { "value": 5, "random": true },
+                "size": { "value": 4, "random": true },
                 "move": { "enable": true, "speed": 3, "direction": "none", "random": true, "out_mode": "out" },
                 "line_linked": { "enable": false }
             },
-            "interactivity": { "events": { "onclick": { "enable": false } } }
+            "interactivity": { "events": { "onclick": { "enable": false }, "onhover": { "enable": false } } }
         });
 
         let timerInterval;
         const mainTimeline = gsap.timeline({ paused: true });
 
+        // 倒计时逻辑
         function updateTimer() {
             const now = new Date().getTime();
             const distance = TARGET_DATE - now;
-
             if (distance < 0) {
-                // 时间到，立即执行主流程
                 clearInterval(timerInterval);
-                document.getElementById("countdown-timer").innerHTML = "00:00:00";
+                document.getElementById("countdown-timer").innerHTML = ""; // 清空倒计时
                 startMainShow();
                 return;
             }
-
-            // 如果还需要倒计时，这里会显示（调试模式下你看不到这个）
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            const hStr = hours < 10 ? "0" + hours : hours;
-            const mStr = minutes < 10 ? "0" + minutes : minutes;
-            const sStr = seconds < 10 ? "0" + seconds : seconds;
-            document.getElementById("countdown-timer").innerHTML = `${hStr}:${mStr}:${sStr} <span class="time-label">UNTIL THE MOMENT</span>`;
+            // (调试模式下不显示具体时间，直接跳过)
         }
 
+        // --- 核心修改：点击开始时的处理 ---
         document.getElementById('start-btn').addEventListener('click', () => {
+            // 1. 尝试激活所有音频和视频 (解决手机不自动播放的问题)
+            bgm1.play().catch(()=>{}); bgm1.pause();
+            bgm2.play().catch(()=>{}); bgm2.pause();
+            shinchanVoice.play().catch(()=>{}); shinchanVoice.pause();
+            videos.forEach(v => { 
+                v.play().catch((e)=>{console.log("视频播放失败，可能路径不对或格式不支持", e)}); 
+                v.pause(); 
+            });
+
+            // 2. 开始界面动画
             gsap.to('#start-screen', { opacity: 0, duration: 0.8, onComplete: () => {
                 document.getElementById('start-screen').style.display = 'none';
                 gsap.to('#stage-particles', { opacity: 1, duration: 1 });
-                bgm1.play();
-                updateTimer();
-                timerInterval = setInterval(updateTimer, 1000);
+                bgm1.play(); // 播放背景乐1
+                updateTimer(); // 触发倒计时结束逻辑
             }});
         });
 
         function startMainShow() {
             const tl = gsap.timeline();
-            tl.to('#countdown-timer', { opacity: 0, scale: 2, duration: 0.5, ease: "power2.in" })
+            // 倒计时文字淡出
+            tl.to('#countdown-timer', { opacity: 0, duration: 0.5 })
               .call(() => {
-                  if(window.pJSDom && window.pJSDom[0]) {
-                      window.pJSDom[0].pJS.particles.move.speed = 40;
-                  }
+                  if(window.pJSDom && window.pJSDom[0]) window.pJSDom[0].pJS.particles.move.speed = 40;
               })
-              .to('#final-100-text', { opacity: 1, scale: 1.2, duration: 2, ease: "elastic.out(1, 0.3)" }, "+=0.2")
-              .to('#stage-particles', { opacity: 0, duration: 1.5 }, "+=3")
+              .to('#final-100-text', { opacity: 1, scale: 1.1, duration: 1.5, ease: "elastic.out(1, 0.3)" }, "+=0.1")
+              // --- 修改：缩短了这里的等待时间到 1 秒 ---
+              .to('#stage-particles', { opacity: 0, duration: 1 }, "+=1") 
               .add(playShinchanSequence());
         }
 
@@ -284,7 +331,7 @@
             
             // 蜡笔小新
             tl.set('#stage-shinchan', { opacity: 1 })
-              .from('#shinchan-img', { y: 200, opacity: 0, duration: 1.2, ease: "back.out(1.7)" })
+              .from('#shinchan-img', { y: 200, opacity: 0, duration: 1, ease: "back.out(1.7)" })
               .to('.dialogue-box', { opacity: 1, scale: 1, duration: 0.5 }, "+=0.2")
               .call(() => shinchanVoice.play())
               .to('#stage-shinchan', { opacity: 0, duration: 0.8 }, "+=3.5");
@@ -296,7 +343,7 @@
             });
             tl.set('#stage-filmroll', { opacity: 0 });
 
-            // 照片画廊
+            // 照片画廊 (带随机颜色字幕)
             tl.set('#stage-gallery', { opacity: 1, pointerEvents: 'auto' });
             
             const slides = document.querySelectorAll('.gallery-slide');
@@ -304,11 +351,13 @@
                 let caption = slide.querySelector('.caption');
                 let text = caption.innerText;
                 caption.innerText = "";
+                // 设置一个随机颜色
+                caption.style.color = getRandomColor();
 
                 let slideTL = gsap.timeline();
-                slideTL.to(slide, { opacity: 1, duration: 4, ease: "power1.inOut" }) 
-                       .to(caption, { text: text, duration: 3, ease: "none" }, "-=2")
-                       .to(slide, { opacity: 0, duration: 2 }, "+=3");
+                slideTL.to(slide, { opacity: 1, duration: 3, ease: "power1.inOut" }) 
+                       .to(caption, { text: text, duration: 2.5, ease: "none" }, "-=1.5")
+                       .to(slide, { opacity: 0, duration: 1.5 }, "+=3");
 
                 tl.add(slideTL);
             });
@@ -316,18 +365,19 @@
             // 视频爱心墙
             tl.call(() => {
                 bgm1.pause();
-                bgm2.play();
-                document.querySelectorAll('.video-item').forEach(v => v.play());
+                bgm2.play(); // 切换BGM
+                // 再次尝试播放视频
+                videos.forEach(v => { v.currentTime = 0; v.play(); });
             })
             .set('#stage-gallery', { opacity: 0 })
             .set('#stage-videoheart', { opacity: 1 })
-            .to('.video-item', { opacity: 1, duration: 2, stagger: 0.3 })
-            .to('.heart-center-text', { opacity: 1, duration: 3, ease: "power2.out" }, "+=1")
-            .to('#stage-videoheart', { opacity: 0, duration: 3 }, "+=6");
+            .to('.video-item', { opacity: 1, duration: 1.5, stagger: 0.2 })
+            .to('.heart-center-text', { opacity: 1, duration: 2, ease: "power2.out" }, "+=0.5")
+            .to('#stage-videoheart', { opacity: 0, duration: 2 }, "+=6");
 
             // 结尾
             tl.set('#stage-finale', { opacity: 1 })
-              .from('#final-message', { y: 30, opacity: 0, duration: 4, ease: "power2.out" });
+              .from('#final-message', { y: 30, opacity: 0, duration: 3, ease: "power2.out" });
 
             return tl;
         }
